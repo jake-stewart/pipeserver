@@ -3,7 +3,6 @@
 
 #include <sys/select.h>
 #include <unistd.h>
-#include <stdbool.h>
 #include "error.h"
 
 struct fd_reader {
@@ -25,14 +24,6 @@ void create_fd_reader(
     struct fd_reader *fd_reader,
     int *fds,
     int n_fds
-);
-
-error _fd_reader_reset(struct fd_reader *reader);
-
-error _fd_reader_next(
-    struct fd_reader *reader,
-    struct fd_read_result *result,
-    bool *found
 );
 
 error fd_reader_read(

@@ -187,16 +187,20 @@ error send_input(struct pipeserver_args *args) {
     if (!is_alive(args)) {
         ABORT_ERR(spawn_server(args), {});
     }
-    FILE *pipe = fopen(args->pipefile, "w");
-    if (!pipe) {
+    int fd = open(args->pipefile, O_WRONLY);
+    if (fd == -1) {
         return ERROR("failed to open fifo: %s", strerror(errno));
     }
-    char line[4096];
-    while (fgets(line, sizeof(line), stdin)) {
-        fprintf(pipe, "%s", line);
-        fflush(pipe);
+    char buffer[4096];
+    ssize_t bytes;
+    while ((bytes = read(STDIN_FILENO, buffer, 4096)) != 0) {
+        if (bytes < 0) {
+            close(fd);
+            return ERROR("failed to read stdin: %s", strerror(errno));
+        }
+        write(fd, buffer, bytes);
     }
-    fclose(pipe);
+    close(fd);
     return 0;
 }
 
