@@ -11,7 +11,8 @@
         int n; \
     } type ## _vec; \
     void type ## _vec_push(type ## _vec vec, type value) { \
-        vec.data = (type*)realloc(vec.data, (++vec.n) * sizeof(type)); \
+        vec.data = (type*)realloc( \
+            vec.data, (++vec.n) * sizeof(type)); \
         vec.data[vec.n - 1] = value; \
     } \
     type type ## _vec_pop(type ## _vec vec) { \
