@@ -17,8 +17,18 @@ void debug_log(const char *prefix, int line, const char *format, ...);
 error error_log(int status, int line, const char *format, ...);
 
 #define DEBUG(...) debug_log("DEBUG", __LINE__, __VA_ARGS__)
+
 #define ERROR(...) error_log(1, __LINE__, __VA_ARGS__)
-#define STATUS_ERROR(status, ...) error_log(status, __LINE__, __VA_ARGS__)
-#define ABORT_ERR(code, cleanup) { error err = code; if (err) { cleanup; return err; } }
+
+#define STATUS_ERROR(status, ...) \
+    error_log(status, __LINE__, __VA_ARGS__)
+
+#define ABORT_ERR(code, cleanup) { \
+    error err = code; \
+    if (err) { \
+        cleanup; \
+        return err; \
+    } \
+}
 
 #endif

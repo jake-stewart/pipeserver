@@ -4,16 +4,27 @@
 #include <stdarg.h>
 
 const char *debug_file = NULL;
+char errormsg[1024] = "something went wrong";
+struct error_details error_details;
 
 void set_debug_file(const char *file) {
     debug_file = file;
 }
 
-void debug_log(const char *prefix, int line, const char *format, ...) {
+void debug_log(
+    const char *prefix,
+    int line,
+    const char *format,
+    ...
+) {
     if (debug_file == NULL) {
         return;
     }
-    int fd = open(debug_file, O_RDWR | O_APPEND | O_CREAT, 0644);
+    int fd = open(
+        debug_file,
+        O_RDWR | O_APPEND | O_CREAT,
+        0644
+    );
     struct flock lock = {
         .l_type = F_WRLCK,
         .l_whence = SEEK_SET,
@@ -33,10 +44,12 @@ void debug_log(const char *prefix, int line, const char *format, ...) {
     close(fd);
 }
 
-char errormsg[1024] = "something went wrong";
-struct error_details error_details;
-
-error error_log(int status, int line, const char *format, ...) {
+error error_log(
+    int status,
+    int line,
+    const char *format,
+    ...
+) {
     va_list args;
     va_start(args, format);
     vsnprintf(errormsg, sizeof errormsg, format, args);
