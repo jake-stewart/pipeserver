@@ -1,30 +1,33 @@
 #ifndef VEC_H
 #define VEC_H
 
-#include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 
-typedef struct {
-    size_t elem_size;
-    size_t capacity;
-    size_t len;
-    void *data;
-} vec;
+#define VEC_ZERO() { 0, 0 }
 
-#define vec_init(type) (vec){ sizeof(type), 0, 0, 0 }
-void vec_deinit(vec *v);
+#define DEFINE_VEC(type) \
+    typedef struct { \
+        type *data; \
+        int n; \
+    } type ## _vec; \
+    void type ## _vec_push(type ## _vec vec, type value) { \
+        vec.data = (type*)realloc(vec.data, (++vec.n) * sizeof(type)); \
+        vec.data[vec.n - 1] = value; \
+    } \
+    type type ## _vec_pop(type ## _vec vec) { \
+        return vec.data[--vec.n]; \
+    }
 
-void *_vec_push(vec *v);
-void *_vec_pop(vec *v);
-void *_vec_at(vec *v, size_t idx);
-void _vec_remove(vec *v, size_t idx);
+#define VEC_FOR_EACH(vec, idx, name, code) \
+    for (int idx = 0; idx < vec.n; idx++) { \
+         typeof(*vec.data) name = vec.data[idx]; \
+         code \
+    }
 
-#define vec_remove(v, idx) _vec_remove(v, idx)
-
-#define vec_set(v, idx, name) (*((typeof(name)*)(_vec_at(v, idx))) = name)
-#define vec_get(name, v, idx) name = ((typeof (name))_vec_at(v, idx))
-#define vec_pop(name, v) name = ((typeof (name))_vec_pop(v))
-#define vec_push(v, name) (*((typeof(name)*)(_vec_push(v))) = name)
+#define ARRAY_FOR_EACH(arr, idx, name, code) \
+    for (int idx = 0; idx < sizeof arr / sizeof *arr; idx++) { \
+        typeof(*arr) name = arr[idx];\
+        code; \
+    } \
 
 #endif

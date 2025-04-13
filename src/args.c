@@ -29,8 +29,6 @@ error read_args(int argc, char *argv[], struct pipeserver_args *args) {
 
     args->debug_file = NULL;
     args->argv = NULL;
-    args->path[0] = 0;
-    args->command[0] = 0;
     args->action = 0;
     args->pipefile = NULL;
     args->pidfile = NULL;
@@ -69,22 +67,25 @@ error read_args(int argc, char *argv[], struct pipeserver_args *args) {
     }
 
     if (argc > optind) {
-        strcpy(args->path, PIPE_DIR "/" PIPE_PREFIX);
+        char path_buffer[4096];
+        char cmd_buffer[4096];
+        strcpy(cmd_buffer, PIPE_DIR "/" PIPE_PREFIX);
         for (int i = optind; i < argc; i++) {
-            if (strlen(args->path) + strlen(argv[i]) > 4000) {
+            if (strlen(cmd_buffer) + strlen(argv[i]) > 4000) {
                 return ERROR("command is too long");
             }
-            if (strlen(args->command)) {
-                strcat(args->path, "_");
-                strcat(args->command, " ");
+            if (strlen(cmd_buffer)) {
+                strcat(path_buffer, "_");
+                strcat(cmd_buffer, " ");
             }
-            strcat(args->path, argv[i]);
-            strcat(args->command, argv[i]);
+            strcat(path_buffer, argv[i]);
+            strcat(cmd_buffer, argv[i]);
         }
         args->argv = &argv[optind];
-        asprintf(&args->pipefile, "%s%s", args->path, ".pipe");
-        asprintf(&args->pidfile, "%s%s", args->path, ".pid");
-        asprintf(&args->cmdfile, "%s%s", args->path, ".cmd");
+        asprintf(&args->pipefile, "%s%s", path_buffer, ".pipe");
+        asprintf(&args->pidfile, "%s%s", path_buffer, ".pid");
+        asprintf(&args->cmdfile, "%s%s", path_buffer, ".cmd");
+        asprintf(&args->command, "%s", cmd_buffer);
     }
 
     return 0;

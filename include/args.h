@@ -5,13 +5,12 @@
 
 struct pipeserver_args {
     char *debug_file;
-    char path[4096];
-    char command[4096];
     char **argv;
     char action;
     char *pipefile;
     char *pidfile;
     char *cmdfile;
+    char *command;
 };
 
 error read_args(int argc, char *argv[], struct pipeserver_args *args);

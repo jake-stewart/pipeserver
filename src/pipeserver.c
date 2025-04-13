@@ -16,6 +16,7 @@
 #include "../include/process.h"
 #include "../include/args.h"
 #include "../include/util.h"
+#include "../include/vec.h"
 
 void cleanup(struct pipeserver_args *args) {
     remove(args->pipefile);
@@ -107,9 +108,9 @@ error start_server(struct pipeserver_args *args) {
         SIGINT, SIGHUP, SIGQUIT, SIGTERM,
         SIGTSTP, SIGCONT, SIGWINCH
     };
-    for (int i = 0; i < sizeof signals / sizeof *signals; i++) {
-        ABORT_ERR(register_signal_handler(signals[i], signal_handler, args), {});
-    }
+    ARRAY_FOR_EACH(signals, i, signal, {
+        ABORT_ERR(register_signal_handler(signal, signal_handler, args), {});
+    })
 
     DEBUG("entering mainloop");
     error err = server_mainloop(args, &process);
@@ -238,3 +239,4 @@ int main(int argc, char *argv[]) {
     }
     return 0;
 }
+
