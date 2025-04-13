@@ -3,7 +3,7 @@
 #include <errno.h>
 #include <stdlib.h>
 
-error process_spawn(struct process *process, char **args) {
+error process_spawn(process *process, char **args) {
     int pipes[3][2];
 
     for (int i = 0; i < 3; i++) {
@@ -54,7 +54,7 @@ error process_spawn(struct process *process, char **args) {
     }
 }
 
-void process_close(struct process *process) {
+void process_close(process *process) {
     close(process->stdin_fd);
     close(process->stdout_fd);
     close(process->stderr_fd);

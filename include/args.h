@@ -3,7 +3,7 @@
 
 #include "error.h"
 
-struct pipeserver_args {
+typedef struct {
     char *debug_file;
     char **argv;
     char action;
@@ -11,8 +11,8 @@ struct pipeserver_args {
     char *pidfile;
     char *cmdfile;
     char *command;
-};
+} pipeserver_args;
 
-error read_args(int argc, char *argv[], struct pipeserver_args *args);
+error read_args(int argc, char *argv[], pipeserver_args *args);
 
 #endif

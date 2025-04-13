@@ -4,31 +4,32 @@
 #include <sys/select.h>
 #include <unistd.h>
 #include "error.h"
+#include "process.h"
 
-struct fd_reader {
-    struct process *process;
+typedef struct {
+    process *process;
     unsigned int fd_index;
     fd_set fd_set;
     int *fds;
     int n_fds;
-};
+} fd_reader;
 
-struct fd_read_result {
+typedef struct {
     int idx;
     int fd;
     char buffer[4096];
     ssize_t bytes_read;
-};
+} fd_read_result;
 
 void create_fd_reader(
-    struct fd_reader *fd_reader,
+    fd_reader *fd_reader,
     int *fds,
     int n_fds
 );
 
 error fd_reader_read(
-    struct fd_reader *reader,
-    struct fd_read_result *result
+    fd_reader *reader,
+    fd_read_result *result
 );
 
 #endif

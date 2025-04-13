@@ -6,15 +6,15 @@
 #define PIPE_READ 0
 #define PIPE_WRITE 1
 
-struct process {
+typedef struct {
     pid_t pid;
     int stdin_fd;
     int stdout_fd;
     int stderr_fd;
-};
+} process;
 
-error process_spawn(struct process *process, char **args);
+error process_spawn(process *process, char **args);
 
-void process_close(struct process *process);
+void process_close(process *process);
 
 #endif

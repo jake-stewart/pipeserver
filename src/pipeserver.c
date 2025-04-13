@@ -18,29 +18,32 @@
 #include "../include/util.h"
 #include "../include/vec.h"
 
-void cleanup(struct pipeserver_args *args) {
+void cleanup(pipeserver_args *args) {
     remove(args->pipefile);
     remove(args->cmdfile);
     remove(args->pidfile);
 }
 
 void signal_handler(void *data) {
-    struct pipeserver_args *args = data;
+    pipeserver_args *args = data;
     cleanup(args);
     exit(1);
 }
 
 error server_mainloop(
-    struct pipeserver_args *args,
-    struct process *process
+    pipeserver_args *args,
+    process *process
 ) {
-    struct fd_reader reader;
-    struct fd_read_result result;
+    fd_reader reader;
+    fd_read_result result;
 
     while (true) {
-        int input_fd = open(args->pipefile, O_RDONLY | O_NONBLOCK);
+        int input_fd = open(
+            args->pipefile, O_RDONLY | O_NONBLOCK);
         if (input_fd == -1) {
-            return ERROR("failed to open pipe: %s", strerror(errno));
+            return ERROR(
+                "failed to open pipe: %s",
+                strerror(errno));
         }
         const int n_fds = 3;
         int fds[n_fds] = {
@@ -62,7 +65,8 @@ error server_mainloop(
                     break;
                 }
                 else {
-                    error err = ERROR("process %s reached EOF",
+                    error err = ERROR(
+                        "process %s reached EOF",
                         stdfile_name(result.idx));
                     close(input_fd);
                     return err;
@@ -80,7 +84,8 @@ error server_mainloop(
                     result.buffer,
                     result.bytes_read);
                 if (bytes_written == -1) {
-                    error err = ERROR("failed to write process stdin: %s",
+                    error err = ERROR(
+                        "failed to write process stdin: %s",
                         strerror(errno));
                     close(input_fd);
                     return err;
@@ -90,9 +95,9 @@ error server_mainloop(
     }
 }
 
-error start_server(struct pipeserver_args *args) {
+error start_server(pipeserver_args *args) {
     DEBUG("spawning process");
-    struct process process;
+    process process;
     ABORT_ERR(process_spawn(&process, args->argv), {});
 
     DEBUG("writing files");
@@ -109,7 +114,8 @@ error start_server(struct pipeserver_args *args) {
         SIGTSTP, SIGCONT, SIGWINCH
     };
     ARRAY_FOR_EACH(signals, i, signal, {
-        ABORT_ERR(register_signal_handler(signal, signal_handler, args), {});
+        ABORT_ERR(register_signal_handler(
+            signal, signal_handler, args), {});
     })
 
     DEBUG("entering mainloop");
@@ -121,10 +127,12 @@ error start_server(struct pipeserver_args *args) {
     return err;
 }
 
-error spawn_server(struct pipeserver_args *args) {
+error spawn_server(pipeserver_args *args) {
     DEBUG("creating fifo");
     if (mkfifo(args->pipefile, 0666) == -1) {
-        return ERROR("failed to create fifo: %s", strerror(errno));
+        return ERROR(
+            "failed to create fifo: %s",
+            strerror(errno));
     }
     DEBUG("forking server");
     pid_t pid = fork();
@@ -136,24 +144,30 @@ error spawn_server(struct pipeserver_args *args) {
         return 0;
     }
     else {
-        error err = ERROR("failed to fork: %s", strerror(errno));
+        error err = ERROR(
+            "failed to fork: %s",
+            strerror(errno));
         remove(args->pipefile);
         return err;
     }
 }
 
-int is_alive(struct pipeserver_args *args) {
+int is_alive(pipeserver_args *args) {
     return access(args->pidfile, F_OK) == 0;
 }
 
-error kill_server(struct pipeserver_args *args) {
+error kill_server(pipeserver_args *args) {
     FILE *f = fopen(args->pidfile, "r");
     if (!f) {
-        return ERROR("'%s' is not running", args->command);
+        return ERROR(
+            "'%s' is not running",
+            args->command);
     }
     int pid;
     if (fscanf(f, "%d", &pid) != 1) {
-        return ERROR("'%s' has invalid pid file", args->command);
+        return ERROR(
+            "'%s' has invalid pid file",
+            args->command);
     }
     fclose(f);
     kill(pid, SIGTERM);
@@ -184,20 +198,26 @@ error list_servers() {
     return 0;
 }
 
-error send_input(struct pipeserver_args *args) {
+error send_input(pipeserver_args *args) {
     if (!is_alive(args)) {
         ABORT_ERR(spawn_server(args), {});
     }
     int fd = open(args->pipefile, O_WRONLY);
     if (fd == -1) {
-        return ERROR("failed to open fifo: %s", strerror(errno));
+        return ERROR(
+            "failed to open fifo: %s",
+            strerror(errno));
     }
     char buffer[4096];
     ssize_t bytes;
-    while ((bytes = read(STDIN_FILENO, buffer, 4096)) != 0) {
+    while (
+        (bytes = read(STDIN_FILENO, buffer, 4096)) != 0
+    ) {
         if (bytes < 0) {
             close(fd);
-            return ERROR("failed to read stdin: %s", strerror(errno));
+            return ERROR(
+                "failed to read stdin: %s",
+                strerror(errno));
         }
         write(fd, buffer, bytes);
     }
@@ -206,7 +226,7 @@ error send_input(struct pipeserver_args *args) {
 }
 
 error start(int argc, char *argv[]) {
-    struct pipeserver_args args;
+    pipeserver_args args;
     ABORT_ERR(read_args(argc, argv, &args), {});
 
     bool provided_command = args.command
@@ -219,13 +239,15 @@ error start(int argc, char *argv[]) {
     }
     else if (args.action == 's') {
         if (!provided_command) {
-            return STATUS_ERROR(2, "missing command for --send");
+            return STATUS_ERROR(
+                2, "missing command for --send");
         }
         return send_input(&args);
     }
     else if (args.action == 'k') {
         if (!provided_command) {
-            return STATUS_ERROR(2, "missing command for --kill");
+            return STATUS_ERROR(
+                2, "missing command for --kill");
         }
         return kill_server(&args);
     }

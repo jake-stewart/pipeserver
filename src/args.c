@@ -17,7 +17,7 @@ void usage() {
     printf("                           if a pipeserver does not exist, one will be created\n");
 }
 
-error read_args(int argc, char *argv[], struct pipeserver_args *args) {
+error read_args(int argc, char *argv[], pipeserver_args *args) {
     static struct option long_options[] = {
         {"help", no_argument, 0, 'h'},
         {"list", no_argument, 0, 'l'},
