@@ -209,7 +209,8 @@ error start(int argc, char *argv[]) {
     struct pipeserver_args args;
     ABORT_ERR(read_args(argc, argv, &args), {});
 
-    bool provided_command = strlen(args.command) > 0;
+    bool provided_command = args.command
+        && strlen(args.command) > 0;
 
     set_debug_file(args.debug_file);
 

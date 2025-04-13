@@ -27,6 +27,7 @@ error read_args(int argc, char *argv[], struct pipeserver_args *args) {
         {0, 0, 0, 0}
     };
 
+    args->command = NULL;
     args->debug_file = NULL;
     args->argv = NULL;
     args->action = 0;
@@ -67,11 +68,11 @@ error read_args(int argc, char *argv[], struct pipeserver_args *args) {
     }
 
     if (argc > optind) {
-        char path_buffer[4096];
-        char cmd_buffer[4096];
-        strcpy(cmd_buffer, PIPE_DIR "/" PIPE_PREFIX);
+        char path_buffer[4096] = "";
+        char cmd_buffer[4096] = "";
+        strcpy(path_buffer, PIPE_DIR "/" PIPE_PREFIX);
         for (int i = optind; i < argc; i++) {
-            if (strlen(cmd_buffer) + strlen(argv[i]) > 4000) {
+            if (strlen(path_buffer) + strlen(argv[i]) > 4000) {
                 return ERROR("command is too long");
             }
             if (strlen(cmd_buffer)) {
