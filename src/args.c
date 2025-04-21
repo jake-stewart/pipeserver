@@ -15,6 +15,7 @@ void usage() {
     printf("    --kill <CMD> <ARGS>    stop the pipeserver running CMD with ARGS\n");
     printf("    --send <CMD> <ARGS>    feed STDIN into the pipeserver running CMD with ARGS\n");
     printf("                           if a pipeserver does not exist, one will be created\n");
+    printf("                           if no option is provided, --send is used as default\n");
 }
 
 error read_args(int argc, char *argv[], pipeserver_args *args) {
@@ -35,10 +36,21 @@ error read_args(int argc, char *argv[], pipeserver_args *args) {
     args->pidfile = NULL;
     args->cmdfile = NULL;
 
-    int opt;
     int idx = 0;
+    optind = 1;
 
-    while ((opt = getopt_long(argc, argv, "h l f k s d:", long_options, &idx)) != -1) {
+    while (optind < argc && argv[optind][0] == '-') {
+        if (!strcmp(argv[optind], "--")) {
+            optind++;
+            break;
+        }
+        int opt = getopt_long(
+            argc,
+            argv,
+            "h l f k s d:",
+            long_options,
+            &idx
+        );
         switch (opt) {
             case 'h':
                 usage();
@@ -63,8 +75,7 @@ error read_args(int argc, char *argv[], pipeserver_args *args) {
     }
 
     if (!args->action) {
-        usage();
-        exit(2);
+        args->action = 's';
     }
 
     if (argc > optind) {
