@@ -19,7 +19,7 @@ Alternatively, you can pipe that script into a pipeserver:
 
 ```sh
 echo 'tell application "Firefox" to activate' \
-    | pipeserver --send -- osascript -e 
+    | pipeserver --send -- osascript -i 
 ```
 
 The first invocation takes 150ms like normal, but subsequent
